@@ -37,6 +37,8 @@ public class LogUtils{
                     if (logFile.delete())
                         logFile.createNewFile()
                 }
+                else
+                    println(logFile.createNewFile())
                 write = PrintWriter(logFile)
             }catch (e:IOException){
                 e.printStackTrace()
@@ -51,8 +53,8 @@ public class LogUtils{
             }
         }
 
-        @JvmField
-        var logFile:File = File("Log.txt")
+
+        var logFile = File("log.txt")
         lateinit var write:PrintWriter
     }
 }

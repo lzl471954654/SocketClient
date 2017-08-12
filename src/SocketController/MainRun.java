@@ -1,4 +1,4 @@
-package SocketBeControlled;
+package SocketController;
 
 
 import Utils.LogUtils;
@@ -9,7 +9,7 @@ public class MainRun {
             LogUtils.initLog();
             LogUtils.logInfo("Main","LogInit!");
             System.out.println("123456");
-            Client client = new Client("192.168.1.121",10086,"lzl471954654","Test");
+            Client client = new Client("139.199.20.248",10086,"lzl471954654","Test");
             client.runClient();
         }catch (Exception e)
         {
