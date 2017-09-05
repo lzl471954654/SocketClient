@@ -5,64 +5,62 @@ import Utils.LogUtils
 import java.io.*
 import java.net.*
 
-class Client(val ipAddress:String,val port:Int,val myId:String,val connectedId:String){
+class Client(val ipAddress:String,val port:Int,val username:String,val password:String){
     lateinit var reader:BufferedReader
     lateinit var writer:PrintWriter
     lateinit var socket:Socket
+    val classTag = javaClass.name
     val END = ServerProtocol.END_FLAG
     val builder = StringBuilder()
     var line:String? = null
     var localPort = 0
     fun runClient(){
         try {
-            socket = Socket()
-            socket.reuseAddress = true
-            socket.connect(InetSocketAddress(ipAddress,port))
-            writer = PrintWriter(OutputStreamWriter(socket.getOutputStream()))
+            socket = Socket(ipAddress,port)
+            writer = PrintWriter(socket.getOutputStream())
             reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-            writer.println(ServerProtocol.ONLINE+"_"+myId+"_${ServerProtocol.CONTROL}_"+END)
+            writer.println(ServerProtocol.CONNECTED_TO_USER+"_${username}_${password}_${ServerProtocol.END_FLAG}")
             writer.flush()
-            val onlineResult = readStringData()
-            logInfo(onlineResult)
-            if(onlineResult.startsWith(ServerProtocol.NORMAL_MSG)&&onlineResult.endsWith(ServerProtocol.ONLINE_FAILED))
-            {
-                return
+            line = readStringData()
+            if(line!=null){
+                if(line!!.startsWith(ServerProtocol.CONNECTED_SUCCESS)&&line!!.endsWith(ServerProtocol.END_FLAG)){
+                    loop()
+                }
+                else{
+                    LogUtils.logInfo(classTag,line!!)
+                }
             }
-            writer.println("${ServerProtocol.CONNECTED_TO_USER}_${ServerProtocol.CONTROL}_$connectedId"+"_"+END)
-            writer.flush()
-            val connectedToUserResult = readStringData()
-            logInfo(connectedToUserResult)
-            val params = connectedToUserResult.split("_")
-
-            when(params[0])
-            {
-                ServerProtocol.MAKE_HOLE->{
-                    localPort = socket.localPort
-
-                    connectionByHole(params[1],params[2].toInt(),false)
-                }
-                ServerProtocol.NORMAL_MSG->{
-
-                }
+            else{
+                LogUtils.logInfo(classTag,"No Message from server,Connected to user failed")
             }
         }catch (e:(IOException)){
             e.printStackTrace()
-            LogUtils.logException(javaClass.name,""+e.message)
+            LogUtils.logException(classTag,""+e.message)
         }catch (e:SocketTimeoutException)
         {
             e.printStackTrace()
-            LogUtils.logException(javaClass.name,""+e.message)
+            LogUtils.logException(classTag,""+e.message)
         }finally {
-            writer.println("${ServerProtocol.OFFLINE}_${myId}_${ServerProtocol.CONTROL}_${ServerProtocol.END_FLAG}")
-            writer.flush()
-            socket.shutdownInput()
-            socket.shutdownOutput()
             socket.close()
             println("socket is closed")
             LogUtils.releaseResource()
         }
     }
-
+    fun loop(){
+        var sendString:String? = ""
+        while (true){
+            sendString = readLine()
+            if(sendString==null)
+            {
+                println("Exit")
+                break
+            }
+            writer.println(sendString+"_${ServerProtocol.END_FLAG}")
+            writer.flush()
+            sendString = readStringData()
+            println("From Server: ${sendString}")
+        }
+    }
 
     fun connectionByHole(ip: String,port: Int,UDP:Boolean){
         Thread{

@@ -1,3 +1,1 @@
-Sat Aug 12 22:13:30 CST 2017  Info: Main : LogInit!
-Sat Aug 12 22:13:30 CST 2017  Info: SocketController.Client : |NORMAL@MSG|_|ONLINE@SUCCESS|_@@|END@FLAG|@@
-Sat Aug 12 22:13:30 CST 2017  Info: SocketController.Client : |HOLE|_192.168.1.121_56847_@@|END@FLAG|@@
+Wed Sep 06 00:35:05 CST 2017  Info: Main : LogInit!
